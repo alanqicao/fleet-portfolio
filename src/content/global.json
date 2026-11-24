@@ -1,0 +1,73 @@
+{
+  "identity": {
+    "name": "Alan Cao",
+    "positioning": "Software Development student building practical software across systems, AI, and interactive applications.",
+    "heroSupport": "I like working close to real systems—whether that means fuzzing an emulator subsystem, training a computer-vision model, or integrating software with physical hardware.",
+    "featuredHeading": "Selected Projects",
+    "featuredIntroduction": "A selection of practical work across software security, computer vision, and physical computing.",
+    "aboutPreviewHeading": "About",
+    "aboutPreview": "See the interests and tools behind work spanning systems and software security, AI and computer vision, robotics and physical computing, and software tools and applications."
+  },
+  "about": {
+    "copy": "I'm a Software Development student at the University of Utah who likes understanding how software behaves beyond the happy path. My projects have taken me from fuzzing emulator subsystems and training computer-vision models to building desktop tools and physical prototypes. I tend to learn by getting something working, testing where the assumptions break, and using what I observe to decide what to improve next.",
+    "engineeringApproach": "I usually start by understanding the constraints, prototype the risky part early, and use code, tests, and observed behavior to decide what to change next.",
+    "interests": [
+      {
+        "name": "Systems & Software Security",
+        "description": "Building controlled ways to inspect, test, and reason about the behavior of real software subsystems."
+      },
+      {
+        "name": "AI & Computer Vision",
+        "description": "Connecting trained detection models to applications that act on visual information."
+      },
+      {
+        "name": "Robotics & Physical Computing",
+        "description": "Integrating software, electronics, and fabricated parts into working physical prototypes."
+      },
+      {
+        "name": "Software Tools & Applications",
+        "description": "Building interactive desktop, client/server, and front-end software around clear state and user behavior."
+      }
+    ]
+  },
+  "skills": [
+    { "category": "Languages", "items": ["Python", "C++", "C#", "TypeScript"] },
+    { "category": "Applications & interfaces", "items": ["React", "Qt", ".NET MAUI"] },
+    { "category": "Systems & security tooling", "items": ["AFL++", "CMake", "Git"] },
+    { "category": "AI & computer vision", "items": ["OpenCV", "Ultralytics YOLO"] },
+    { "category": "Physical computing", "items": ["Arduino", "electronics", "physical prototyping"] }
+  ],
+  "education": [
+    {
+      "institution": "University of Utah",
+      "credential": "Bachelor of Science in Software Development"
+    },
+    {
+      "institution": "Salt Lake Community College",
+      "credential": "Associate in Science"
+    }
+  ],
+  "experience": [
+    {
+      "title": "Software Engineer Intern",
+      "organization": "Intermountain Healthcare",
+      "dates": "May 2022 – August 2022",
+      "description": "Contributed to front-end and data-validation work for a caregiver application in an Ionic React / React / TypeScript environment. Wrote tests that helped reach and maintain approximately 90% test coverage."
+    }
+  ],
+  "contact": {
+    "introduction": "Get in touch or view my work and professional profiles.",
+    "destinations": [
+      { "label": "Email", "href": "mailto:alanqicao@gmail.com" },
+      { "label": "GitHub", "href": "https://github.com/alanqicao" },
+      { "label": "LinkedIn", "href": "https://www.linkedin.com/in/alanqicao" },
+      { "label": "Website", "href": "https://www.alanqicao.com" }
+    ]
+  },
+  "resume": {
+    "label": "View Resume",
+    "href": "/resume/Alan_Cao_Resume.pdf",
+    "sourceFilename": "Alan_Cao_Resume_V1_Candidate.pdf",
+    "sourceSha256": "fafdafc37f23d1001fa6a4e4fb2af2efb03afbb47b0def4a417dc1b599b4fa99"
+  }
+}

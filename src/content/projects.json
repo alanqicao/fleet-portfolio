@@ -1,0 +1,178 @@
+[
+  {
+    "id": "pcsx2",
+    "slug": "fuzzing-pcsx2",
+    "title": "Fuzzing PCSX2 — The PlayStation 2 Emulator",
+    "order": 1,
+    "presentation": "primary",
+    "featured": true,
+    "explore": true,
+    "primaryCategory": "Software Security",
+    "supportingCategories": ["Systems Programming", "Fuzz Testing", "Open Source"],
+    "indexCopy": "I built stateful AFL++ harnesses for PCSX2's folder-based memory-card subsystem as part of a four-person security project. The work isolated stateful save behavior into a controllable fuzzing target and contributed to a broader team investigation of memory-card failure modes.",
+    "contributionSignal": "Memory-card fuzz harnesses, CMake integration, seed corpus, and technical documentation.",
+    "featuredCopy": {
+      "body": "I developed stateful memory-card fuzz harnesses for PCSX2, modeling repeated saves, boundary-heavy writes, and flush/close/reopen behavior for AFL++.",
+      "supportingLine": "The project became a practical study in harness design, subsystem isolation, and the difference between isolated fuzzing failures and full-application behavior."
+    },
+    "detail": {
+      "overview": "In a four-person university security project, our team investigated fuzzing paths through PCSX2, an open-source PlayStation 2 emulator. My work centered on isolated fuzz harnesses for the emulator's folder-based memory-card subsystem.",
+      "contribution": "I owned the Memory Card Fuzzing workstream and added and iterated the Stage 3 and Stage 5.1 C++ harness targets, their CMake integration, a small AFL++ seed corpus, and supporting documentation. I also contributed to the team presentation and final report.",
+      "technicalApproach": "The memory-card harness exercised PCSX2's existing `FolderMemoryCard` implementation with repeated and overlapping saves, boundary-heavy writes, and flush, close, and reopen behavior. This isolated approach made stateful memory-card operations accessible to AFL++ without claiming ownership of PCSX2's upstream code.",
+      "engineeringDecisions": "The team moved from broad whole-emulator and ISO-reader experiments toward a stateful folder-memory-card harness. This traded complete emulator context for a more controllable subsystem target while retaining save, flush, close, and reopen operations.",
+      "challengesLessons": "The project showed why a harness crash and a full-application crash must be treated as different evidence. Later GDB triage, malformed-card construction, and full-emulator reproduction were teammate work rather than my individual contribution.",
+      "resultsStatus": "The harness campaign produced two isolated failure modes, but neither was reproduced unchanged in the full emulator. During later team reproduction work, the team found a distinct malformed-card emulator crash; teammate Danny Provo opened PCSX2 Issue #14337, and a PCSX2 developer reproduced it.",
+      "evidence": "The case study is supported by repository history, the final report, the final presentation, AFL++ and harness captures, and the public issue record."
+    },
+    "technologies": ["C++", "AFL++", "CMake", "sanitizers", "Linux", "PCSX2"],
+    "mediaIds": ["PCSX-A01-WIDE", "PCSX-A01-COMPACT", "PCSX-D01-SVG", "PCSX-D01-WEBP"],
+    "evidenceLinks": [
+      {
+        "id": "PCSX-A08",
+        "label": "Public issue #14337 (opened by Danny Provo)",
+        "href": "https://github.com/PCSX2/pcsx2/issues/14337"
+      },
+      {
+        "id": "PCSX-A09",
+        "label": "Official PCSX2 license",
+        "href": "https://github.com/PCSX2/pcsx2/blob/master/pcsx2/Docs/License.txt"
+      }
+    ]
+  },
+  {
+    "id": "yolo-fishing-bot",
+    "slug": "yolo-fishing-bot",
+    "title": "YOLO Fishing Bot",
+    "order": 2,
+    "presentation": "primary",
+    "featured": true,
+    "explore": true,
+    "primaryCategory": "AI / Computer Vision",
+    "supportingCategories": ["Machine Learning", "Automation", "Python"],
+    "indexCopy": "I manually labeled 3,350 game-interface images, trained a custom YOLO detector on my PC, and built a Python fishing bot that turns detections into automated game inputs.",
+    "contributionSignal": "Dataset labeling, model training, and Python detection-to-input automation.",
+    "featuredCopy": {
+      "body": "I carried a computer-vision project from 3,350 manually labeled images through local model training to a Python fishing bot driven by YOLO detections.",
+      "supportingLine": "The project connects screen capture, a custom 42-class detector, and input automation in one local Python application."
+    },
+    "detail": {
+      "overview": "I manually labeled 3,350 game-interface images and trained a custom object detector on my PC. I then wrote a Python Fishing Bot that uses YOLO detections to trigger fishing inputs in the game.",
+      "contribution": "I handled dataset labeling, model training, and the Python automation application. The preserved runtime source and checkpoint support the application and model lineage, while the frozen Owner record supplies the training and authorship boundary.",
+      "technicalApproach": "The detector was fine-tuned from a pretrained YOLOv8m starting checkpoint rather than trained from scratch. At runtime, the Python application captures the game window, runs a 42-class detector, interprets selected detections, and issues corresponding F1/F inputs.",
+      "engineeringDecisions": "The application uses window capture and local inference so detection and input decisions occur on the same PC. A custom 42-class checkpoint supports multiple interface states.",
+      "challengesLessons": "Preserved frames show difficult interface conditions such as occlusion, dense overlays, and duplicate detections. They support qualitative discussion rather than a performance measurement.",
+      "resultsStatus": "The preserved checkpoint and recording show a custom detector producing multi-class predictions, and the source connects selected predictions to automated fishing inputs. Preserved summary values remain internal rather than serving as public performance claims because their evaluation context is incomplete.",
+      "evidence": "The case study is supported by the pinned Python repository, checkpoint metadata, a 13-minute-plus inference recording, extracted frames, and the frozen Owner confirmation for dataset and training authorship."
+    },
+    "technologies": ["Python", "Ultralytics YOLOv8", "PyTorch", "OpenCV", "Win32 screen capture", "PyDirectInput", "custom checkpoint"],
+    "mediaIds": ["YFB-D01-SVG", "YFB-D01-WEBP"],
+    "evidenceLinks": []
+  },
+  {
+    "id": "robot-arm",
+    "slug": "arduino-robot-arm",
+    "title": "Arduino Robot Arm",
+    "order": 3,
+    "presentation": "primary",
+    "featured": true,
+    "explore": true,
+    "primaryCategory": "Robotics",
+    "supportingCategories": ["Embedded Systems", "Physical Computing", "Prototyping"],
+    "indexCopy": "Our four-person team integrated 3D-printed parts, servo-driven joints, Arduino Nano control, and a potentiometer controller into an operating robot-arm prototype. I handled the 3D printing, most soldering, a small amount of Arduino code, and motor/architecture research.",
+    "contributionSignal": "Fabrication, electronics assembly, limited embedded code, and architecture research within a shared design influenced by open-source arms.",
+    "featuredCopy": {
+      "body": "I handled the 3D printing and most soldering, contributed a small amount of Arduino code, and researched motor and architecture choices for our four-person robot-arm prototype.",
+      "supportingLine": "The finished build integrated servo joints, potentiometer control, Arduino hardware, and 3D-printed components into a working physical system."
+    },
+    "detail": {
+      "overview": "Our four-person team built a physical robot-arm prototype with 3D-printed parts, servo-driven joints, Arduino Nano control, and a human-operated potentiometer controller.",
+      "contribution": "I handled the 3D printing and most of the soldering, wrote a small amount of Arduino code, and researched motor and architecture choices. These were my contributions to a shared team prototype.",
+      "technicalApproach": "Potentiometer inputs drove Arduino-controlled servo joints across the arm, while 3D-printed components formed the mechanical structure. The team integrated the controller, wiring, motors, and printed parts into one operating prototype.",
+      "engineeringDecisions": "The team adapted ideas from existing open-source robot-arm designs rather than starting from a wholly original mechanical architecture. We also weighed board size, connection style, available space, cost, and material strength while integrating the prototype.",
+      "challengesLessons": "The project required mechanical, electrical, and control components to work together within tight physical constraints. It also reinforced the importance of crediting existing open-source designs when a prototype adapts established ideas.",
+      "resultsStatus": "The preserved video shows a completed integrated prototype moving under potentiometer control.",
+      "evidence": "The case study is supported by the repository, Arduino source files, the team white paper, project video, and curated fabrication and prototype frames."
+    },
+    "technologies": ["Arduino Nano", "servo motors", "potentiometers", "breadboards", "copper wiring", "soldering", "3D printing"],
+    "mediaIds": ["ARM-A01-WEBP", "ARM-D01-SVG", "ARM-D01-WEBP"],
+    "evidenceLinks": []
+  },
+  {
+    "id": "sprite-editor",
+    "slug": "sprite-editor",
+    "title": "Sprite Editor",
+    "order": 4,
+    "presentation": "compact",
+    "featured": false,
+    "explore": false,
+    "primaryCategory": "Creative Tools",
+    "supportingCategories": ["Desktop Software", "Graphics", "State & Persistence"],
+    "indexCopy": "Our four-person team built a C++/Qt desktop editor for pixel drawing, frame management, preview, playback, and JSON persistence. I implemented pixel-data handling, preview-image functionality, and animated playback.",
+    "contributionSignal": "Pixel-state handling and the image-preview/animation path.",
+    "featuredCopy": null,
+    "detail": {
+      "overview": "Our four-person team built a C++/Qt desktop sprite editor for drawing pixel art, managing frames, previewing animation, and saving or loading projects.",
+      "contribution": "I implemented the component that handled pixel data, along with preview-image functionality and animated playback. The surrounding application was a shared four-person team project.",
+      "technicalApproach": "The application separated frame data, editing behavior, canvas interaction, preview playback, and the Qt view layer. Frames were converted into images for display, serialized through Qt JSON support, and played through a timer-driven preview.",
+      "engineeringDecisions": "The code separates frame state from the canvas and preview, so the same pixel data is used across editing, persistence, and playback. Qt JSON serialization stores and reloads project frames as structured state.",
+      "challengesLessons": "The project required pixel edits, frame selection, saved state, and animation timing to stay consistent across multiple UI components.",
+      "resultsStatus": "The source and recording show a working desktop editor with drawing, frame animation, preview, clear confirmation, save, and load flows.",
+      "evidence": "The case study is supported by the pinned source repository, shared source headers, the workflow recording, and curated editor frames."
+    },
+    "technologies": ["C++17", "Qt Widgets", "Qt images", "Qt JSON", "signals and slots", "timer-driven animation"],
+    "mediaIds": ["SPR-A01-WEBP"],
+    "evidenceLinks": []
+  },
+  {
+    "id": "multiplayer-snake",
+    "slug": "multiplayer-snake",
+    "title": "Multiplayer Snake",
+    "order": 5,
+    "presentation": "compact",
+    "featured": false,
+    "explore": false,
+    "primaryCategory": "Networked Systems",
+    "supportingCategories": ["Client/Server", "Game Development", "Real-Time State"],
+    "indexCopy": "Jared Hildt and I built a C#/.NET MAUI multiplayer Snake game with shared client/server state. I implemented most client-side backend logic, including death, growth after eating, and world-edge wraparound, on top of course-provided networking/vector infrastructure.",
+    "contributionSignal": "Client-side state and gameplay behavior, with supplied infrastructure explicitly separated.",
+    "featuredCopy": null,
+    "detail": {
+      "overview": "Jared Hildt and I built a C#/.NET MAUI multiplayer Snake application with a shared client/server game world. The course supplied networking/vector infrastructure that we integrated rather than authored from scratch.",
+      "contribution": "I implemented most of the client-side backend logic, including player death behavior, body growth after eating, and world-edge wraparound. The broader application was shared with Jared and built on instructor/course-provided infrastructure.",
+      "technicalApproach": "The solution separated the .NET MAUI client, shared game model, server, network controller, and vector utility into distinct projects. JSON messages carried world state that the client rendered as snakes, walls, power-ups, names, scores, and effects.",
+      "engineeringDecisions": "Client-side rendering and camera behavior turned server state into a readable local view, while wraparound logic preserved movement across open world edges. The team integrated supplied networking/vector foundations rather than authoring those foundations.",
+      "challengesLessons": "The README records edge cases around simultaneous direction input and spawning near an open world boundary. Those issues show how synchronized game rules and wrapped geometry can produce visible client/server inconsistencies.",
+      "resultsStatus": "The source and recording show a working multiplayer game with multiple players, a shared world, custom rendering, growth, death behavior, and world-edge traversal.",
+      "evidence": "The case study is supported by the pinned repository, README and source documentation, gameplay recording, and curated gameplay frames."
+    },
+    "technologies": ["C#", ".NET MAUI", "TCP/socket networking", "JSON", "XML configuration", "custom drawing"],
+    "mediaIds": ["SNK-A01-WEBP"],
+    "evidenceLinks": []
+  },
+  {
+    "id": "viotti-amazon",
+    "slug": "viotti-amazon-business-data-system",
+    "title": "VIOTTI Amazon Business Data System",
+    "order": 6,
+    "presentation": "compact",
+    "featured": false,
+    "explore": false,
+    "primaryCategory": "Data Engineering",
+    "supportingCategories": ["Full-Stack Development", "Business Analytics"],
+    "indexCopy": "I built a local analytics platform for my Amazon FBA business. It brings sales, inventory, finance, returns, and advertising data into one workspace and shows which metrics are backed by complete reporting.",
+    "contributionSignal": "I built the data pipeline, PostgreSQL analytics layer, and Next.js dashboard.",
+    "featuredCopy": null,
+    "detail": {
+      "overview": "As an Amazon seller, I had to piece together reports from Seller Central, Amazon Ads, and my cost records to answer questions about contribution profit and stockout risk. I built the VIOTTI Business Control Center as an internal dashboard that brings those sources together and makes the data behind each decision visible.",
+      "contribution": "I built the data pipeline, PostgreSQL analytics layer, and Next.js dashboard. I also added scheduled syncs with catch-up after downtime, automated email reports, and a read-only MCP interface for querying business metrics from ChatGPT.",
+      "technicalApproach": "Python sync jobs collect Amazon SP-API and Amazon Ads reports and load them into PostgreSQL. SQL views combine reported fees, refunds, landed product costs, and sellable-return cost recovery to calculate SKU-level contribution. The dashboard traces each metric to its reporting window and shows Sponsored Products spend alongside sales, contribution, and FBA inventory.",
+      "engineeringDecisions": "I used completed report windows to track data coverage independently from sales activity. A day with a downloaded report can legitimately show zero sales. A date with no completed report stays visible as a gap.",
+      "challengesLessons": "Finance and advertising reports can cover different dates. When Finance records are still settling, the dashboard marks eligible contribution subtotals as provisional and shows the underlying coverage. The provisional after-ad subtotal has its own cutoff date when Sponsored Products coverage is incomplete.",
+      "resultsStatus": "I use the local system with VIOTTI's Amazon US data to review sales, analyze SKU-level contribution, and assess FBA replenishment needs. I also imported 455 consecutive days of Sponsored Products campaign history through Amazon Ads Unified Reporting, from August 13, 2025 through November 10, 2026.",
+      "evidence": "The screenshots and silent walkthrough show the dashboard connected to a temporary PostgreSQL database seeded with synthetic orders, costs, ad spend, and inventory."
+    },
+    "technologies": ["Python", "PostgreSQL", "SQL", "Next.js", "React", "TypeScript", "Amazon SP-API", "Amazon Ads API", "MCP"],
+    "mediaIds": ["VIOTTI-OVERVIEW-WEBP", "VIOTTI-PROFITABILITY-WEBP", "VIOTTI-DATA-HEALTH-WEBP", "VIOTTI-WALKTHROUGH-WEBM"],
+    "evidenceLinks": []
+  }
+]

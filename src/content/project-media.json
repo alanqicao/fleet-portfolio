@@ -1,0 +1,200 @@
+{
+  "assets": [
+    {
+      "id": "PCSX-A01-WIDE",
+      "projectId": "pcsx2",
+      "src": "/media/projects/pcsx2/harness-wide.webp",
+      "width": 1310,
+      "height": 956,
+      "kind": "screenshot",
+      "alt": "AFL++ campaign status for Alan Cao's isolated PCSX2 memory-card harness.",
+      "caption": "AFL++ campaign evidence from Alan Cao's isolated memory-card harness within a four-person PCSX2 security project. PCSX2 supplies the underlying memory-card implementation. Run counters are not verified defect counts. The later full-emulator Issue #14337 was a separate team outcome submitted by Danny Provo.",
+      "previewCaption": "Alan Cao's isolated AFL++ harness campaign in a four-person PCSX2 project; counters are not verified defects."
+    },
+    {
+      "id": "PCSX-A01-COMPACT",
+      "projectId": "pcsx2",
+      "src": "/media/projects/pcsx2/harness-compact.webp",
+      "width": 1310,
+      "height": 550,
+      "kind": "screenshot",
+      "alt": "AFL++ campaign status for Alan Cao's isolated PCSX2 memory-card harness.",
+      "caption": "AFL++ campaign evidence from Alan Cao's isolated memory-card harness within a four-person PCSX2 security project. PCSX2 supplies the underlying memory-card implementation. Run counters are not verified defect counts. The later full-emulator Issue #14337 was a separate team outcome submitted by Danny Provo.",
+      "previewCaption": "Alan Cao's isolated AFL++ harness campaign in a four-person PCSX2 project; counters are not verified defects."
+    },
+    {
+      "id": "PCSX-D01-WEBP",
+      "projectId": "pcsx2",
+      "src": "/media/projects/pcsx2/harness-state-flow.webp",
+      "width": 1022,
+      "height": 1546,
+      "kind": "diagram",
+      "alt": "AFL++ input passes through Alan's stateful harness to upstream PCSX2 FolderMemoryCard.",
+      "caption": "Explanatory diagram of repeated and overlapping saves, boundary-heavy writes, and flush, close, and reopen behavior. Alan's harness orchestration is distinct from the upstream PCSX2 implementation and the team's later full-emulator reproduction work."
+    },
+    {
+      "id": "YFB-D01-WEBP",
+      "projectId": "yolo-fishing-bot",
+      "src": "/media/projects/yolo-fishing-bot/detection-pipeline.webp",
+      "width": 1280,
+      "height": 760,
+      "kind": "diagram",
+      "alt": "Training provenance and runtime flow for the YOLO Fishing Bot.",
+      "caption": "Explanatory diagram separating local fine-tuning from runtime automation. Alan manually labeled 3,350 images and fine-tuned a pretrained YOLOv8m checkpoint; the Python application connects detector output to fishing inputs. This is a diagram, not an application screenshot or performance measurement."
+    },
+    {
+      "id": "ARM-A01-WEBP",
+      "projectId": "robot-arm",
+      "src": "/media/projects/arduino-robot-arm/prototype.webp",
+      "width": 415,
+      "height": 360,
+      "kind": "photograph",
+      "alt": "Robot-arm prototype showing servo joints, wiring, and a participant's hand.",
+      "caption": "Four-person team prototype, photographed by a teammate. Alan handled 3D printing, most soldering, a small amount of Arduino code, and motor and architecture research. The team adapted existing open-source robot-arm ideas; this still does not independently demonstrate operation.",
+      "previewCaption": "Four-person team prototype adapted from existing robot-arm ideas; photo by a teammate."
+    },
+    {
+      "id": "ARM-D01-WEBP",
+      "projectId": "robot-arm",
+      "src": "/media/projects/arduino-robot-arm/control-flow.webp",
+      "width": 803,
+      "height": 1545,
+      "kind": "diagram",
+      "alt": "Potentiometer input passes through Arduino Nano control and servo commands to move the robot arm.",
+      "caption": "Explanatory control-flow diagram for the shared four-person prototype. It preserves Alan's bounded fabrication, assembly, code and research contribution and the project's adapted mechanical-design context."
+    },
+    {
+      "id": "SPR-A01-WEBP",
+      "projectId": "sprite-editor",
+      "src": "/media/projects/sprite-editor/editor.webp",
+      "width": 721,
+      "height": 486,
+      "kind": "screenshot",
+      "alt": "Sprite Editor with a pixel canvas, frame list, preview, and playback controls.",
+      "caption": "Still captured by Alan from the four-person team's Sprite Editor demonstration. The visible artwork was created by the team. Alan's contribution covered pixel-data handling, preview-image functionality and animated playback; the still alone does not demonstrate animation."
+    },
+    {
+      "id": "SNK-A01-WEBP",
+      "projectId": "multiplayer-snake",
+      "src": "/media/projects/multiplayer-snake/gameplay.webp",
+      "width": 577,
+      "height": 582,
+      "kind": "screenshot",
+      "alt": "Multiple colored snakes share an obstacle-filled game world.",
+      "caption": "Gameplay still captured by Alan from the project shared with Jared Hildt. Networking/vector foundations and artwork were course-provided; artwork credit belongs to Jolie Uk and Alex Smith. The still alone does not demonstrate death, growth or wraparound behavior."
+    },
+    {
+      "id": "VIOTTI-OVERVIEW-WEBP",
+      "projectId": "viotti-amazon",
+      "src": "/media/projects/viotti-amazon/overview.webp",
+      "width": 2880,
+      "height": 2000,
+      "kind": "screenshot",
+      "alt": "VIOTTI dashboard showing sales, orders, contribution, Sponsored Products spend, and an operational trend.",
+      "caption": "Business overview with period comparisons and a visible reporting gap. Synthetic demo data.",
+      "previewCaption": "Business overview with period comparisons and a visible reporting gap. Synthetic demo data."
+    },
+    {
+      "id": "VIOTTI-PROFITABILITY-WEBP",
+      "projectId": "viotti-amazon",
+      "src": "/media/projects/viotti-amazon/profitability.webp",
+      "width": 2880,
+      "height": 2000,
+      "kind": "screenshot",
+      "alt": "VIOTTI profitability report showing cost categories and data coverage.",
+      "caption": "The contribution report shows fees, landed costs, and source coverage. When ad reporting is incomplete, the provisional after-ad subtotal carries its own cutoff date. Synthetic demo data."
+    },
+    {
+      "id": "VIOTTI-DATA-HEALTH-WEBP",
+      "projectId": "viotti-amazon",
+      "src": "/media/projects/viotti-amazon/data-health.webp",
+      "width": 2880,
+      "height": 2000,
+      "kind": "screenshot",
+      "alt": "Date-by-date coverage table for Order Reports, Finance, and Sponsored Products.",
+      "caption": "The coverage calendar shows which days are missing for Order Reports, Finance, and Sponsored Products. Synthetic demo data."
+    },
+    {
+      "id": "VIOTTI-WALKTHROUGH-WEBM",
+      "projectId": "viotti-amazon",
+      "src": "/media/projects/viotti-amazon/dashboard-walkthrough.webm",
+      "width": 1440,
+      "height": 1000,
+      "kind": "video",
+      "label": "Silent walkthrough of the VIOTTI dashboard",
+      "poster": "/media/projects/viotti-amazon/overview.webp",
+      "caption": "Opens the contribution evidence panel, then moves through Profitability and Data Health. Recorded in the working dashboard with synthetic data."
+    }
+  ],
+  "surfaces": {
+    "pcsx2": {
+      "home": [
+        "PCSX-A01-COMPACT"
+      ],
+      "index": [
+        "PCSX-A01-COMPACT"
+      ],
+      "opening": [
+        "PCSX-A01-WIDE"
+      ],
+      "evidence": [
+        "PCSX-A01-WIDE",
+        "PCSX-D01-WEBP"
+      ]
+    },
+    "yolo-fishing-bot": {
+      "home": [],
+      "index": [],
+      "opening": [],
+      "evidence": [
+        "YFB-D01-WEBP"
+      ]
+    },
+    "robot-arm": {
+      "home": [
+        "ARM-A01-WEBP"
+      ],
+      "index": [
+        "ARM-A01-WEBP"
+      ],
+      "opening": [
+        "ARM-A01-WEBP"
+      ],
+      "evidence": [
+        "ARM-A01-WEBP",
+        "ARM-D01-WEBP"
+      ]
+    },
+    "sprite-editor": {
+      "home": [],
+      "index": [],
+      "opening": [],
+      "evidence": [
+        "SPR-A01-WEBP"
+      ]
+    },
+    "multiplayer-snake": {
+      "home": [],
+      "index": [],
+      "opening": [],
+      "evidence": [
+        "SNK-A01-WEBP"
+      ]
+    },
+    "viotti-amazon": {
+      "home": [],
+      "index": [
+        "VIOTTI-OVERVIEW-WEBP"
+      ],
+      "opening": [
+        "VIOTTI-OVERVIEW-WEBP"
+      ],
+      "evidence": [
+        "VIOTTI-OVERVIEW-WEBP",
+        "VIOTTI-PROFITABILITY-WEBP",
+        "VIOTTI-DATA-HEALTH-WEBP",
+        "VIOTTI-WALKTHROUGH-WEBM"
+      ]
+    }
+  }
+}

@@ -1,0 +1,138 @@
+:root {
+  color-scheme: dark;
+  --void: #02040a;
+  --glass: rgb(7 13 24 / .74);
+  --text: #dce6f2;
+  --text-soft: #93a4bb;
+  --holo: #8fdcff;
+  --holo-line: rgb(143 220 255 / .3);
+  --holo-faint: rgb(143 220 255 / .13);
+  --amber: #f2a93b;
+  --display: "Saira Condensed";
+  --label: "Saira";
+  --label-weight: 500;
+  --label-scale: 1.14;
+  --h1-weight: 300;
+  --h1-scale: 1.26;
+  --h1-track: .14em;
+  --h2-scale: .9;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --gutter: clamp(18px, 4.5vw, 64px);
+  --bar: 56px;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--void); scroll-padding-top: var(--bar); }
+html:has(dialog[open]) { overflow: hidden; }
+body { margin: 0; color: var(--text); font: 400 16.5px/1.58 var(--body); overflow-x: clip; }
+h1, h2, h3, p, ul, dl, dd, figure { margin: 0; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+a:hover { color: var(--holo); }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .9em; color: var(--holo); }
+
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+
+/* The top bar reads like a ship's status strip. */
+.bar {
+  position: fixed; z-index: 3; inset: 0 0 auto 0; height: var(--bar);
+  display: flex; align-items: center; gap: 24px; padding: 0 var(--gutter);
+  background: linear-gradient(rgb(2 4 10 / .9), rgb(2 4 10 / 0));
+  font: var(--label-weight) calc(10.5px * var(--label-scale))/1 var(--label), "Barlow", sans-serif; letter-spacing: .16em; text-transform: uppercase;
+}
+.bar-name { font-size: calc(12.5px * var(--label-scale)); letter-spacing: .28em; text-decoration: none; margin-right: auto; }
+.bar nav { display: flex; gap: 24px; }
+.bar nav a { text-decoration: none; color: var(--text-soft); }
+.bar nav a:hover { color: var(--holo); }
+.bar button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--text-soft); background: none; border: 1px solid var(--holo-line); padding: 8px 12px; cursor: pointer; }
+.bar button:hover { color: var(--holo); border-color: var(--holo); }
+
+#page { position: relative; z-index: 1; pointer-events: none; }
+[data-ui] { pointer-events: auto; }
+
+.stop { display: flex; padding: calc(var(--bar) + 24px) var(--gutter) 48px; }
+.opening { min-height: 100svh; align-items: flex-end; }
+.project { min-height: 135svh; align-items: center; }
+.closing { min-height: 100svh; align-items: flex-start; padding-top: 30svh; padding-bottom: 20svh; }
+
+.opening-copy { max-width: 31rem; }
+h1 {
+  font: var(--h1-weight) calc(clamp(40px, 7.4vw, 116px) * var(--h1-scale))/1 var(--label), "Barlow", sans-serif; letter-spacing: var(--h1-track); text-transform: uppercase;
+  margin: 0 0 .36em -.02em; white-space: nowrap; text-shadow: 0 0 60px rgb(143 220 255 / .25);
+}
+.lede { font-size: 20px; line-height: 1.38; font-weight: 500; margin-bottom: 12px; text-wrap: pretty; }
+.opening-copy p { text-wrap: pretty; text-shadow: 0 1px 14px rgb(2 4 10 / .9); }
+.opening-copy p:not(.lede) { color: var(--text-soft); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; padding: 0; margin-top: 26px; list-style: none; }
+
+.button {
+  display: inline-block; font: var(--label-weight) calc(10.5px * var(--label-scale))/1 var(--label), "Barlow", sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--amber); background: rgb(242 169 59 / .1); border: 1px solid var(--amber);
+  padding: 15px 18px; text-decoration: none; cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.button:hover { color: #0a0d14; background: var(--amber); }
+
+/* Panels are glass readouts: a hairline frame with brighter corner marks. */
+.panel {
+  position: relative; width: min(27rem, 100%); padding: 26px 28px 28px;
+  background: var(--glass); border: 1px solid var(--holo-faint);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.panel::before, .panel::after {
+  content: ""; position: absolute; width: 18px; height: 18px; border: 0 solid var(--holo); pointer-events: none;
+}
+.panel::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+.panel::after { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+.panel.wide { width: min(34rem, 100%); }
+.panel h2 { font: 600 calc(clamp(36px, 3.9vw, 52px) * var(--h2-scale))/1.02 var(--display), "Arial Narrow", sans-serif; letter-spacing: .005em; text-wrap: balance; }
+.panel h3 { font: var(--label-weight) calc(10.5px * var(--label-scale))/1.4 var(--label), "Barlow", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--holo); margin: 32px 0 8px; }
+.panel p { margin-top: 12px; text-wrap: pretty; }
+.kind { font: var(--label-weight) calc(9.5px * var(--label-scale))/1.7 var(--label), "Barlow", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--holo); }
+.panel .kind { margin-top: 10px; }
+.part { border-top: 1px solid var(--holo-faint); padding-top: 12px; }
+.part strong { font-weight: 500; color: var(--holo); }
+.try { border-top: 1px solid var(--holo-faint); padding-top: 12px; color: var(--text-soft); font-size: 15px; }
+.panel .button { margin-top: 20px; }
+.panel dl { display: grid; gap: 2px; }
+.panel dt { font-weight: 500; margin-top: 10px; }
+.panel dd { color: var(--text-soft); }
+.panel dl.compact { grid-template-columns: max-content 1fr; column-gap: 18px; }
+.panel dl.compact dt, .panel dl.compact dd { margin-top: 6px; }
+.credits { padding: 0; margin-top: 10px; list-style: none; color: var(--text-soft); font-size: 15px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin-top: 12px; list-style: none; }
+
+/* The case study opens as a datapad over the scene. */
+#sheet {
+  width: min(47rem, 100%); max-width: none; height: 100dvh; max-height: none; margin: 0 0 0 auto;
+  padding: 0; border: 0; border-left: 1px solid var(--holo-line); background: #070c17; color: var(--text); overflow-y: auto;
+}
+#sheet::backdrop { background: rgb(2 4 10 / .72); }
+.sheet-bar { position: sticky; top: 0; z-index: 1; display: flex; justify-content: flex-end; padding: 12px clamp(18px, 4vw, 44px); background: #070c17; border-bottom: 1px solid var(--holo-faint); }
+.sheet-bar button { font: var(--label-weight) calc(10px * var(--label-scale))/1 var(--label), "Barlow", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--holo); background: none; border: 1px solid var(--holo-line); padding: 10px 14px; cursor: pointer; }
+.sheet-bar button:hover { border-color: var(--holo); background: var(--holo-faint); }
+#sheet article { padding: 30px clamp(18px, 4vw, 44px) 72px; max-width: 42rem; }
+#sheet h2 { font: 600 calc(clamp(40px, 5.6vw, 62px) * var(--h2-scale))/1.02 var(--display), "Arial Narrow", sans-serif; text-wrap: balance; }
+#sheet h2:focus { outline: none; }
+#sheet .kind { margin-top: 12px; }
+#sheet h3 { font: var(--label-weight) calc(10.5px * var(--label-scale))/1.4 var(--label), "Barlow", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--holo); margin: 36px 0 10px; }
+#sheet p + p { margin-top: 12px; }
+#sheet figure { margin: 28px 0; }
+#sheet img, #sheet video { display: block; width: 100%; height: auto; background: #0f1626; border: 1px solid var(--holo-faint); }
+#sheet figcaption { margin-top: 8px; font-size: 14.5px; line-height: 1.45; color: var(--text-soft); }
+#sheet .links { margin-top: 14px; }
+
+@media (max-width: 860px) {
+  .bar { gap: 14px; letter-spacing: .1em; }
+  .bar nav a:not(#resume) { display: none; }
+  /* The scene keeps the top of the window; the panel takes the rest. */
+  .project { min-height: 150svh; align-items: flex-end; padding-bottom: 3svh; }
+  .project .panel { padding: 16px 18px 18px; font-size: 15px; line-height: 1.5; }
+  .project .panel h2 { font-size: 30px; }
+  .project .panel .kind { display: none; }
+  .project .panel p { margin-top: 8px; }
+  .part, .try { padding-top: 8px; }
+  .try { font-size: 14px; }
+  .panel .button { margin-top: 14px; }
+  body { font-size: 16px; }
+}
