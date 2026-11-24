@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 
+import { modelUrl } from "./models.js";
+
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
 
@@ -46,7 +48,7 @@ export function loadArm(spec: ArmParts) {
   const rest = { bearing: 0, upper: 0, fore: 0, hand: 0 };
   const turn = new THREE.Quaternion();
 
-  loader.load(spec.file, (gltf) => {
+  loader.load(modelUrl(spec.file), (gltf) => {
     const model = gltf.scene;
     const find = (name: string) => {
       const part = model.getObjectByName(name);

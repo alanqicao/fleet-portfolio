@@ -5,6 +5,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { flicker, ink, seeded, type Station, type StationInput } from "./kit.js";
+import { light } from "./models.js";
 import { loadShip, type ShipLive, type ShipSpec } from "./ship.js";
 
 export interface Placement {
@@ -199,7 +200,7 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
   scene.add(new THREE.HemisphereLight(0x7f9ad6, 0x1a2036, 1.1));
   const sun = new THREE.DirectionalLight(0xffe9cf, 5.2);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.setScalar(light ? 1024 : 2048);
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.03;
   sun.shadow.radius = 4;
@@ -250,7 +251,8 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
     const aspect = width / height;
     const tall = aspect < 0.9;
     const far = tall ? 2.55 : Math.max(1, 1.45 / aspect);
-    const ratio = Math.min(window.devicePixelRatio, 2) * detail;
+    // Phone screens are dense enough that drawing every pixel costs more than it shows.
+    const ratio = Math.min(window.devicePixelRatio, light ? 1.5 : 2) * detail;
     renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
     composer.setPixelRatio(ratio);
@@ -479,6 +481,13 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
       return { x: Math.round((spot.x + 1) / 2 * window.innerWidth), y: Math.round((1 - spot.y) / 2 * window.innerHeight) };
     };
   }
+
+  // If the device takes the graphics context away, say so instead of leaving a blank scene.
+  canvas.addEventListener("webglcontextlost", (event) => {
+    event.preventDefault();
+    paused = true;
+    document.getElementById("scene-note")?.removeAttribute("hidden");
+  });
 
   layout();
   window.addEventListener("resize", () => { layout(); snap = true; });

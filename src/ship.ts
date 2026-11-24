@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { lamp, plume, puff } from "./kit.js";
+import { modelUrl } from "./models.js";
 
 export interface ShipSpec {
   /** Path of the compressed model under /models. */
@@ -90,7 +91,7 @@ export function loadShip(spec: ShipSpec) {
   };
   holder.userData.live = live;
 
-  loader.load(spec.file, (gltf) => {
+  loader.load(modelUrl(spec.file), (gltf) => {
     const model = gltf.scene;
     model.rotation.set(...spec.turn);
     model.updateMatrixWorld(true);

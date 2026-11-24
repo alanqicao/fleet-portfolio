@@ -35,3 +35,10 @@ were tested.
 Props keep their parts separate, so add these flags when rebuilding one:
 `--flatten false --join false --simplify false --instance false --palette false --prune false`.
 The arm depends on it: `src/rig.ts` turns its joints by part name.
+
+## Phones
+
+Model textures are what fill graphics memory, and a phone browser closes a tab that asks for too much.
+`public/models/` holds the full set (about 385 MB of textures once on the graphics card) and
+`public/models/lite/` a set with smaller textures (about 97 MB). `src/models.ts` picks the light set on
+touch devices and small screens. When adding a model, build both.
