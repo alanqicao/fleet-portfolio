@@ -1,126 +1,96 @@
 import * as THREE from "three";
-import { block, clamp, engine, greeble, ink, loft, mast, matte, navLights, post, windowRow, type Station } from "../kit.js";
+import { block, clamp, ink, post, type Station } from "../kit.js";
+import { prop } from "../props.js";
+import { loadArm } from "../rig.js";
 
-const UPPER = 3.0;
-const FORE = 2.6;
-const HAND = 0.95;
-const SHOULDER_Y = 1.15;
+const CRATE_Y = 0.26;
 
-function hinge(color: number) {
-  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.7, 20), matte(color));
-  disc.rotation.x = Math.PI / 2;
-  disc.castShadow = true;
-  return disc;
-}
-
-/** Turn an angle toward a goal at a limited speed, the way a hobby servo does. */
-function servo(angle: number, goal: number, dt: number, speed = 3.2) {
+/** Turn an angle toward a goal at a limited speed, the way a servo does. */
+function servo(angle: number, goal: number, dt: number, speed = 2.6) {
   const gap = Math.atan2(Math.sin(goal - angle), Math.cos(goal - angle));
   return angle + clamp(gap, -speed * dt, speed * dt);
 }
 
-/** The tug. A four-joint arm on its back reaches for the pointer and handles drifting cargo. */
+/** The tug. An industrial arm on its back reaches for the pointer and handles drifting cargo. */
 export function createArm(): Station {
   const group = new THREE.Group();
 
-  group.add(block(0.8, 0.5, 1.9, ink.slate, -1.5, 0, 0));
+  const arm = loadArm({
+    file: "/models/arm.glb",
+    base: "Cylinder002", shoulder: "Cylinder003", elbow: "Circle006", wrist: "Circle009", tip: "Circle011",
+    fingers: ["Line013", "Line012"],
+    hide: ["Rectangle002", "Line020", "Line024"],
+    reach: 4.6,
+  });
+  group.add(arm.group);
 
-  group.add(post(1.05, 0.3, ink.graphite));
-  const turntable = new THREE.Group();
-  turntable.position.y = 0.3;
-  turntable.add(post(0.8, 0.28, ink.orange), block(0.3, 0.8, 0.9, ink.graphite, 0, 0.28, 0));
-  group.add(turntable);
-
-  const shoulder = new THREE.Group();
-  shoulder.position.y = SHOULDER_Y - 0.3;
-  shoulder.add(hinge(ink.orange), block(0.46, UPPER, 0.42, ink.steel));
-  turntable.add(shoulder);
-
-  const elbow = new THREE.Group();
-  elbow.position.y = UPPER;
-  elbow.add(hinge(ink.orange), block(0.38, FORE, 0.36, ink.steel));
-  shoulder.add(elbow);
-
-  const wrist = new THREE.Group();
-  wrist.position.y = FORE;
-  const wristHinge = hinge(ink.graphite);
-  wristHinge.scale.setScalar(0.75);
-  wrist.add(wristHinge, block(0.7, 0.3, 0.5, ink.graphite, 0, 0.25, 0));
-  elbow.add(wrist);
-  const fingers = [block(0.12, 0.55, 0.4, ink.orange, -0.3, 0.5, 0), block(0.12, 0.55, 0.4, ink.orange, 0.3, 0.5, 0)];
-  wrist.add(...fingers);
-  const tip = new THREE.Object3D();
-  tip.position.y = HAND;
-  wrist.add(tip);
-
-  // One knob per joint on the aft console, as on the real build.
+  // One knob per joint on a small console beside the arm, as on the real build.
+  group.add(block(0.7, 0.4, 1.7, ink.slate, -1.7, 0, 0));
   const knobs = [0, 1, 2, 3].map((index) => {
     const knob = new THREE.Group();
-    knob.position.set(-1.5, 0.5, -0.66 + index * 0.44);
-    knob.add(post(0.17, 0.2, ink.orange, 0, 0, 0, 16), block(0.05, 0.04, 0.18, ink.bone, 0, 0.2, -0.07));
+    knob.position.set(-1.7, 0.4, -0.6 + index * 0.4);
+    knob.add(post(0.14, 0.16, ink.orange, 0, 0, 0, 16), block(0.04, 0.03, 0.15, ink.bone, 0, 0.16, -0.06));
     group.add(knob);
     return knob;
   });
 
-  const crate = (color: number, x: number, z: number) => {
-    const box = block(0.6, 0.6, 0.6, color, x, -0.1, z);
+  // Cargo crates adrift round the tug. Each is centred on its own position.
+  const crate = (x: number, z: number) => {
+    const box = prop("/models/crate.glb", 0.72);
+    box.position.set(x, CRATE_Y, z);
     box.userData.spin = 0.2 + Math.abs(x) * 0.05;
     return box;
   };
-  const cubes = [crate(ink.yellow, 3.2, 2.6), crate(ink.water, 1.4, -3.0), crate(ink.orange, -1.8, -2.9)];
+  const cubes = [crate(2.5, 1.7), crate(1.2, -2.7), crate(-1.7, -2.4)];
   group.add(...cubes);
-  let held: THREE.Mesh | null = null;
+  let held: THREE.Object3D | null = null;
 
-  const angles = { yaw: 0.4, shoulder: -0.5, elbow: -1.4, wrist: -1.2 };
+  const pose = { bearing: 0.4, upper: 1.0, fore: -0.4 };
   const goal = new THREE.Vector3(3, 1, 0);
   const reach = new THREE.Vector3();
   let grip = 0;
 
   function update(dt: number, time: number, input: Parameters<Station["update"]>[2]) {
-    if (input.point) goal.set(input.point.x, held ? 1.0 : 0.2, input.point.z);
-    else goal.set(Math.cos(time * 0.45) * 3.4, 1.3 + Math.sin(time * 0.9) * 0.5, Math.sin(time * 0.45) * 2.8);
+    const { shoulderY, upper, fore, hand, back } = arm.dims;
+    if (input.point) goal.set(input.point.x, held ? 1.1 : 0.45, input.point.z);
+    else goal.set(Math.cos(time * 0.45) * 3.2, 1.4 + Math.sin(time * 0.9) * 0.5, Math.sin(time * 0.45) * 2.6);
 
-    // Keep the goal where the arm can actually get to.
-    const radius = clamp(Math.hypot(goal.x, goal.z), 1.9, UPPER + FORE - 0.9);
+    // Keep the goal where the arm can actually get to, then solve the two links for it.
+    // The shoulder sits behind the axis the arm turns about, so its reach is measured from there.
+    const radius = clamp(Math.hypot(goal.x, goal.z), 1.6, upper + fore - back - 0.4) + back;
     const bearing = Math.atan2(-goal.z, goal.x);
-    const dy = goal.y + HAND - SHOULDER_Y;
-    const span = clamp(Math.hypot(radius, dy), Math.abs(UPPER - FORE) + 0.2, UPPER + FORE - 0.05);
-    const upperLift = Math.atan2(dy, radius) + Math.acos((UPPER * UPPER + span * span - FORE * FORE) / (2 * UPPER * span));
-    const bend = Math.acos((UPPER * UPPER + FORE * FORE - span * span) / (2 * UPPER * FORE));
+    const rise = goal.y + hand - shoulderY;
+    const span = clamp(Math.hypot(radius, rise), Math.abs(upper - fore) + 0.2, upper + fore - 0.05);
+    const upperLift = Math.atan2(rise, radius) + Math.acos((upper * upper + span * span - fore * fore) / (2 * upper * span));
+    const bend = Math.acos((upper * upper + fore * fore - span * span) / (2 * upper * fore));
     const foreLift = upperLift - (Math.PI - bend);
 
-    angles.yaw = servo(angles.yaw, bearing, dt);
-    angles.shoulder = servo(angles.shoulder, upperLift - Math.PI / 2, dt);
-    angles.elbow = servo(angles.elbow, -(Math.PI - bend), dt);
-    angles.wrist = servo(angles.wrist, -Math.PI / 2 - foreLift, dt, 5);
-    turntable.rotation.y = angles.yaw;
-    shoulder.rotation.z = angles.shoulder;
-    elbow.rotation.z = angles.elbow;
-    wrist.rotation.z = angles.wrist;
+    pose.bearing = servo(pose.bearing, bearing, dt);
+    pose.upper = servo(pose.upper, upperLift, dt);
+    pose.fore = servo(pose.fore, foreLift, dt);
+    arm.pose(pose.bearing, pose.upper, pose.fore, grip);
 
-    knobs[0].rotation.y = angles.yaw;
-    knobs[1].rotation.y = angles.shoulder * 2;
-    knobs[2].rotation.y = angles.elbow * 2;
+    knobs[0].rotation.y = pose.bearing;
+    knobs[1].rotation.y = pose.upper * 2;
+    knobs[2].rotation.y = pose.fore * 2;
     knobs[3].rotation.y = grip * 2.4;
 
     group.updateWorldMatrix(true, true);
-    group.worldToLocal(tip.getWorldPosition(reach));
+    group.worldToLocal(arm.tip(reach));
     if (input.clicked) {
       if (held) {
-        held.position.set(reach.x, -0.1, reach.z);
+        held.position.set(reach.x, CRATE_Y, reach.z);
         held = null;
       } else {
-        held = cubes.find((cube) => Math.hypot(cube.position.x - reach.x, cube.position.z - reach.z) < 0.6 && reach.y < 0.9) ?? null;
+        held = cubes.find((cube) => Math.hypot(cube.position.x - reach.x, cube.position.z - reach.z) < 0.7 && reach.y < 1.3) ?? null;
       }
     }
     for (const cube of cubes) {
-      if (cube === held) { cube.position.set(reach.x, reach.y - 0.6, reach.z); cube.rotation.y = angles.yaw; }
+      if (cube === held) { cube.position.set(reach.x, reach.y - 0.45, reach.z); cube.rotation.y = pose.bearing; }
       else cube.rotation.y += cube.userData.spin * dt;
     }
     grip += clamp((held ? 1 : 0) - grip, -dt * 6, dt * 6);
-    fingers[0].position.x = -0.42 + grip * 0.1;
-    fingers[1].position.x = 0.42 - grip * 0.1;
   }
 
-  return { group, planeY: 0.2, update };
+  return { group, planeY: 0.3, update };
 }

@@ -1,11 +1,14 @@
 import * as THREE from "three";
-import { clamp, glow, ink, loft, seeded, tiles, type Station } from "../kit.js";
+import { clamp, glow, ink, seeded, tiles, type Station } from "../kit.js";
+import { flock } from "../props.js";
 
 const HALF_X = 6;
 const HALF_Z = 4;
 const GAP = 0.62;
 const LONGEST = 22;
 const SPEED = 3.4;
+/** Turns the container model so its long side runs along the direction of travel. */
+const CAR_TURN: [number, number, number] = [0, 0, 0];
 
 interface Convoy {
   x: number; z: number; heading: number;
@@ -25,20 +28,14 @@ export function createSnake(): Station {
   const group = new THREE.Group();
   const random = seeded(5);
 
-  // Each car is a small plated pod with a running light at its tail.
-  const pod = loft([
-    { x: -0.2, w: 0.12, top: 0.25, bottom: 0.05, chamfer: 0.05 },
-    { x: -0.12, w: 0.16, top: 0.3, bottom: 0, chamfer: 0.06 },
-    { x: 0.12, w: 0.16, top: 0.3, bottom: 0, chamfer: 0.06 },
-    { x: 0.21, w: 0.09, top: 0.23, bottom: 0.07, chamfer: 0.04 },
-  ], ink.bone).geometry;
-  const cars = tiles(LONGEST * 3, 0.4, 0.3, 0.3, true, pod);
+  // Each car is a cargo container, with a running light at its tail.
+  const cars = flock("/models/container.glb", LONGEST * 3, 0.56, CAR_TURN, true);
   const tails = tiles(LONGEST * 3, 0.06, 0.06, 0.12, false);
-  group.add(cars, tails);
+  group.add(cars.group, tails);
 
   const convoys: Convoy[] = [ink.orange, ink.bone, ink.water].map((shade, index) => ({
     x: -3 + index * 3, z: -2 + index * 2, heading: index * 2.1, length: 6, wake: [], travelled: 0,
-    shade: new THREE.Color(shade).multiplyScalar(1.5), lead: new THREE.Color(shade).multiplyScalar(4),
+    shade: new THREE.Color(shade), lead: new THREE.Color(shade).multiplyScalar(4),
   }));
 
   const beaconLook = glow(ink.yellow, 4);
@@ -102,10 +99,10 @@ export function createSnake(): Station {
         if (!at) break;
         place.set(at.x, 0, at.z);
         turn.setFromAxisAngle(up, -at.heading);
-        size.set(car === 0 ? 1.8 : 1.45, car === 0 ? 1.8 : 1.45, car === 0 ? 1.8 : 1.45);
+        place.y = 0.2;
+        size.setScalar(car === 0 ? 1.25 : 1);
         matrix.compose(place, turn, size);
-        cars.setMatrixAt(slot, matrix);
-        cars.setColorAt(slot, convoy.shade);
+        cars.place(slot, matrix, convoy.shade);
         place.set(at.x - Math.cos(at.heading) * 0.34, 0.2, at.z - Math.sin(at.heading) * 0.34);
         matrix.compose(place, turn, size.set(1.4, 1.4, 1.4));
         tails.setMatrixAt(slot, matrix);
@@ -113,11 +110,10 @@ export function createSnake(): Station {
         slot++;
       }
     });
-    for (; slot < LONGEST * 3; slot++) { cars.setMatrixAt(slot, hidden); tails.setMatrixAt(slot, hidden); }
+    for (; slot < LONGEST * 3; slot++) { cars.hide(slot); tails.setMatrixAt(slot, hidden); }
     tails.instanceMatrix.needsUpdate = true;
     tails.instanceColor!.needsUpdate = true;
-    cars.instanceMatrix.needsUpdate = true;
-    cars.instanceColor!.needsUpdate = true;
+    cars.commit();
     beacons.forEach((beacon, index) => { beacon.rotation.y = time * 1.5 + index; });
   }
 

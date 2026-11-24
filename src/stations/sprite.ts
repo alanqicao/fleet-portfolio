@@ -1,12 +1,13 @@
 import * as THREE from "three";
-import { block, damp, engine, greeble, ink, loft, mast, post, projected, projection, tiles, type Station } from "../kit.js";
+import { block, damp, glow, housing, ink, lamp, post, tiles, type Station } from "../kit.js";
 
 const SIZE = 16;
 const PITCH = 0.42;
 const HALF = (SIZE - 1) * PITCH / 2;
 const BOARD_X = -1.0;
 
-const paints = [ink.slate, ink.bone, ink.orange, ink.yellow, ink.water];
+/** Blank, then the four paints. The values are the light each element gives off when lit. */
+const paints = [0x05080c, 0xdfe6f0, 0xff5a1f, 0xffe04a, 0x3f8cff];
 const art = [
   "................",
   "................",
@@ -27,35 +28,40 @@ const art = [
 ];
 const letter: Record<string, number> = { ".": 0, w: 1, o: 2, y: 3, b: 4 };
 
-/** The signal carrier. Its flight deck is a pixel board you can paint, with a tank for each colour. */
+/**
+ * The signal carrier. A display panel is set into its flight deck, one lamp per pixel, and
+ * you paint it. A well beside the panel holds each colour.
+ */
 export function createSprite(): Station {
   const group = new THREE.Group();
-
-  const pixels = tiles(SIZE * SIZE, 0.38, 0.14, 0.38, "holo");
-  // The carrier throws the board up from its deck.
-  const edge = HALF + 0.3;
-  group.add(projection(new THREE.Vector3(BOARD_X, -0.35, 0), [
-    new THREE.Vector3(BOARD_X - edge, 0, -edge), new THREE.Vector3(BOARD_X + edge, 0, -edge), new THREE.Vector3(BOARD_X + edge, 0, edge), new THREE.Vector3(BOARD_X - edge, 0, edge),
-  ]));
-  pixels.position.y = 0.02;
+  group.add(housing(SIZE * PITCH + 0.12, SIZE * PITCH + 0.12, BOARD_X, 0));
+  const pixels = tiles(SIZE * SIZE, 0.36, 0.03, 0.36, false);
   group.add(pixels);
 
   const cells = new Uint8Array(SIZE * SIZE);
   art.forEach((row, z) => [...row].forEach((mark, x) => { cells[z * SIZE + x] = letter[mark]; }));
-  const rise = new Float32Array(SIZE * SIZE).fill(1);
+  const level = new Float32Array(SIZE * SIZE).fill(1);
 
+  // Paint wells beside the panel: a low metal ring with a lit cap in its colour. They sit at
+  // deck level so a click lands where it looks like it lands. The chosen one shows a marker lamp.
   const pots = paints.map((paint, index) => {
     const pot = new THREE.Group();
     pot.position.set(3.3, 0, -2.2 + index * 1.1);
-    pot.add(post(0.42, 0.45, ink.slate, 0, 0, 0, 20), post(0.34, 0.08, paint, 0, 0.45, 0, 20));
-    group.add(projected(pot));
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.04, 24), glow(index === 0 ? 0x1a2230 : paint, index === 0 ? 1 : 1.3));
+    cap.position.y = 0.1;
+    const marker = lamp(0xffffff, 0.5, 2.4);
+    marker.position.set(0.55, 0.12, 0);
+    pot.add(post(0.4, 0.09, ink.steel, 0, 0, 0, 24), cap, marker);
+    pot.userData.marker = marker;
+    group.add(block(0.95, 0.06, 0.95, ink.graphite, 3.3, -0.05, -2.2 + index * 1.1), pot);
     return pot;
   });
   let brush = 2;
   let touched = false;
 
-  // Painted pixels shine; bare deck stays dull.
-  const shades = paints.map((paint, index) => new THREE.Color(paint).multiplyScalar(index === 0 ? 0.5 : index === 1 ? 0.8 : 1.5));
+  const shades = paints.map((paint, index) => new THREE.Color(paint).multiplyScalar(index === 1 ? 0.62 : 1));
+  const preview = paints.map((paint, index) => new THREE.Color(paint).multiplyScalar(index === 0 ? 4 : 0.55));
+  const colour = new THREE.Color();
   const matrix = new THREE.Matrix4();
 
   function update(dt: number, time: number, input: Parameters<Station["update"]>[2]) {
@@ -84,17 +90,19 @@ export function createSprite(): Station {
     }
 
     for (let i = 0; i < cells.length; i++) {
-      const goal = (cells[i] ? 2.2 : 1) + (i === hover ? 2 : 0);
-      rise[i] = damp(rise[i], goal, 14, dt);
-      matrix.makeScale(1, rise[i], 1);
-      matrix.setPosition(BOARD_X - HALF + (i % SIZE) * PITCH, 0, -HALF + Math.floor(i / SIZE) * PITCH);
+      // A freshly painted element comes up to full brightness over a moment.
+      level[i] = damp(level[i], 1, 9, dt);
+      matrix.makeTranslation(BOARD_X - HALF + (i % SIZE) * PITCH, 0, -HALF + Math.floor(i / SIZE) * PITCH);
       pixels.setMatrixAt(i, matrix);
-      pixels.setColorAt(i, i === hover && !input.pressed ? shades[brush] : shades[cells[i]]);
+      if (i === hover && !input.pressed) colour.copy(preview[brush]).lerp(shades[cells[i]], 0.35);
+      else colour.copy(shades[cells[i]]).multiplyScalar(level[i]);
+      pixels.setColorAt(i, colour);
     }
+    if (hover >= 0 && (input.pressed || input.clicked)) level[hover] = 1.8;
     pixels.instanceMatrix.needsUpdate = true;
     pixels.instanceColor!.needsUpdate = true;
-    pots.forEach((pot, index) => { pot.position.y = damp(pot.position.y, index === brush ? 0.3 : 0, 12, dt); });
+    pots.forEach((pot, index) => { (pot.userData.marker as THREE.Sprite).visible = index === brush; });
   }
 
-  return { group, planeY: 0.2, update };
+  return { group, planeY: 0.05, update };
 }

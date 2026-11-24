@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { block, clamp, damp, engine, greeble, ink, loft, projection, seeded, tiles, windowRow, type Station } from "../kit.js";
+import { block, clamp, damp, housing, ink, lamp, probeShape, seeded, tiles, type Station } from "../kit.js";
+import type { ShipLive } from "../ship.js";
 
 const COLS = 16;
 const ROWS = 8;
@@ -8,59 +9,60 @@ const ORIGIN_X = -2.9;
 const PROBES = 40;
 
 interface Probe { cell: number; from: THREE.Vector3; hit: THREE.Vector3; along: number; }
-interface Spark { cell: number; hit: THREE.Vector3; age: number; }
+interface Spark { hit: THREE.Vector3; age: number; }
 
 const cellX = (cell: number) => ORIGIN_X + (cell % COLS) * PITCH;
 const cellZ = (cell: number) => (Math.floor(cell / COLS) - (ROWS - 1) / 2) * PITCH;
 
 /**
- * The test ship. Its deck is a field of memory cells; probes fly in and overwrite them
- * until the ship faults, goes dark, and restarts from its saved state.
+ * The cruiser under test, and the monitor that flies beside it showing its memory. Probes
+ * strike the hull and overwrite cells until the ship faults, loses power, and restarts from
+ * its saved state.
  */
 export function createFuzz(): Station {
   const group = new THREE.Group();
   const random = seeded(7);
   const count = COLS * ROWS;
+  const midX = ORIGIN_X + (COLS - 1) * PITCH / 2;
 
-
-  const cells = tiles(count, 0.42, 1, 0.42, "holo");
-  cells.position.y = 0.04;
+  // The monitor: a display panel in a metal housing, kept on station by a thruster pod at each corner.
+  group.add(housing(COLS * PITCH + 0.2, ROWS * PITCH + 0.2, midX, 0));
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const cx = midX + sx * (COLS * PITCH / 2 + 0.45), cz = sz * (ROWS * PITCH / 2 + 0.45);
+    group.add(block(0.36, 0.3, 0.36, ink.slate, cx, -0.4, cz));
+    const marker = lamp(sx > 0 ? ink.green : ink.red, 0.3, 1.6);
+    marker.position.set(cx, -0.05, cz);
+    group.add(marker);
+  }
+  const cells = tiles(count, 0.44, 0.03, 0.44, false);
   group.add(cells);
-  const darts = tiles(PROBES, 0.5, 0.07, 0.07, false);
-  group.add(darts);
-  const flying: Probe[] = [];
 
-  // The cruiser projects its own memory map in front of it.
-  const far = cellX(COLS - 1) + 0.3, near = cellX(0) - 0.3, half = ROWS * PITCH / 2 + 0.1;
-  group.add(projection(new THREE.Vector3(0.8, 0.4, -4.3), [
-    new THREE.Vector3(near, 0, -half), new THREE.Vector3(far, 0, -half), new THREE.Vector3(far, 0, half), new THREE.Vector3(near, 0, half),
-  ]));
-  // Where a probe strikes the hull, a flash, and a trace down to the cell it changed.
-  const flashes = tiles(PROBES, 0.5, 0.5, 0.5, false);
+  // Probes: small guided rounds, each with a lit motor.
+  const rounds = tiles(PROBES, 1, 1, 1, true, probeShape());
+  const motors = tiles(PROBES, 0.1, 0.06, 0.06, false);
+  const flashes = tiles(PROBES, 0.42, 0.42, 0.42, false, new THREE.IcosahedronGeometry(0.5, 1));
+  group.add(rounds, motors, flashes);
+  const flying: Probe[] = [];
   const sparks: Spark[] = [];
-  const traceSpots = new Float32Array(PROBES * 6);
-  const traceShape = new THREE.BufferGeometry();
-  traceShape.setAttribute("position", new THREE.BufferAttribute(traceSpots, 3));
-  const traces = new THREE.LineSegments(traceShape, new THREE.LineBasicMaterial({ color: new THREE.Color(ink.orange).multiplyScalar(3), transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
-  traces.frustumCulled = false;
-  group.add(flashes, traces);
 
   // The saved state is orderly; overwrites are what disturb it.
   const saved = new Float32Array(count);
   for (let i = 0; i < count; i++) {
     const col = i % COLS, row = Math.floor(i / COLS);
-    saved[i] = 0.16 + 0.14 * Math.sin(col * 0.8) * Math.cos(row * 0.9) + (col % 4 === 0 ? 0.2 : 0);
+    saved[i] = 0.3 + 0.22 * Math.sin(col * 0.8) * Math.cos(row * 0.9) + (col % 4 === 0 ? 0.25 : 0);
   }
   const value = Float32Array.from(saved);
   const shown = Float32Array.from(saved);
   const heat = new Float32Array(count);
 
-  const cool = new THREE.Color(ink.steel), hot = new THREE.Color(ink.orange).multiplyScalar(4);
-  const fault = new THREE.Color(ink.red).multiplyScalar(3), dart = new THREE.Color(ink.orange).multiplyScalar(5);
+  const dim = new THREE.Color(0x06121c), lit = new THREE.Color(0x2f9bd6).multiplyScalar(1.5);
+  const hot = new THREE.Color(ink.orange).multiplyScalar(4), fault = new THREE.Color(ink.red).multiplyScalar(3);
+  const casing = new THREE.Color(0xb9c0cc), burn = new THREE.Color(0xffa24a).multiplyScalar(5);
   const colour = new THREE.Color();
   const matrix = new THREE.Matrix4();
   const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
-  const turn = new THREE.Quaternion(), ahead = new THREE.Vector3(1, 0, 0), way = new THREE.Vector3(), spot = new THREE.Vector3();
+  const turn = new THREE.Quaternion(), ahead = new THREE.Vector3(1, 0, 0), way = new THREE.Vector3();
+  const spot = new THREE.Vector3(), one = new THREE.Vector3(1, 1, 1), grow = new THREE.Vector3();
   let autoTimer = 0;
   let stress = 0;
   let failing = 0;
@@ -96,7 +98,7 @@ export function createFuzz(): Station {
           value[probe.cell] = random();
           heat[probe.cell] = 1;
           stress += 0.006;
-          sparks.push({ cell: probe.cell, hit: probe.hit, age: 0 });
+          sparks.push({ hit: probe.hit, age: 0 });
           flying.splice(i, 1);
         }
       }
@@ -104,54 +106,53 @@ export function createFuzz(): Station {
     }
 
     flying.forEach((probe, index) => {
-      spot.copy(probe.hit);
-      way.subVectors(spot, probe.from).normalize();
+      way.subVectors(probe.hit, probe.from).normalize();
       turn.setFromUnitVectors(ahead, way);
-      spot.lerpVectors(probe.from, spot, probe.along);
-      matrix.compose(spot, turn, way.set(1, 1, 1));
-      darts.setMatrixAt(index, matrix);
-      darts.setColorAt(index, dart);
+      spot.lerpVectors(probe.from, probe.hit, probe.along);
+      matrix.compose(spot, turn, one);
+      rounds.setMatrixAt(index, matrix);
+      rounds.setColorAt(index, casing);
+      spot.addScaledVector(way, -0.24);
+      matrix.compose(spot, turn, one);
+      motors.setMatrixAt(index, matrix);
+      motors.setColorAt(index, burn);
     });
-    for (let i = flying.length; i < PROBES; i++) darts.setMatrixAt(i, hidden);
-    darts.instanceMatrix.needsUpdate = true;
-    darts.instanceColor!.needsUpdate = true;
+    for (let i = flying.length; i < PROBES; i++) { rounds.setMatrixAt(i, hidden); motors.setMatrixAt(i, hidden); }
+    for (const mesh of [rounds, motors]) { mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor!.needsUpdate = true; }
 
-    traceSpots.fill(0);
+    // Where a probe strikes, a brief flash on the hull.
     for (let i = sparks.length - 1; i >= 0; i--) {
-      const spark = sparks[i];
-      spark.age += dt;
-      if (spark.age > 0.35) { sparks.splice(i, 1); continue; }
+      sparks[i].age += dt;
+      if (sparks[i].age > 0.3) sparks.splice(i, 1);
     }
     sparks.slice(0, PROBES).forEach((spark, index) => {
-      const fade = 1 - spark.age / 0.35;
-      matrix.makeScale(fade, fade, fade);
-      matrix.setPosition(spark.hit.x, spark.hit.y - 0.25 * fade, spark.hit.z);
+      const fade = 1 - spark.age / 0.3;
+      matrix.compose(spark.hit, turn.identity(), grow.setScalar(0.35 + (1 - fade) * 0.9));
       flashes.setMatrixAt(index, matrix);
-      flashes.setColorAt(index, dart);
-      traceSpots.set([spark.hit.x, spark.hit.y, spark.hit.z, cellX(spark.cell), 0.4, cellZ(spark.cell)], index * 6);
+      flashes.setColorAt(index, colour.copy(burn).multiplyScalar(fade));
     });
     for (let i = Math.min(sparks.length, PROBES); i < PROBES; i++) flashes.setMatrixAt(i, hidden);
     flashes.instanceMatrix.needsUpdate = true;
     flashes.instanceColor!.needsUpdate = true;
-    traceShape.attributes.position.needsUpdate = true;
 
+    // On a fault the cruiser itself loses power, flickers, and comes back.
     const blink = failing > 0 && Math.sin(time * 30) > 0;
-    // On a fault the cruiser itself loses power, then comes back.
-    for (const lamp of (station.ship?.userData.lamps ?? []) as THREE.MeshStandardMaterial[]) lamp.emissiveIntensity = failing > 0 && !blink ? 0 : 3.2;
+    (station.ship?.userData.live as ShipLive | undefined)?.power(failing <= 0 || blink);
+
     for (let i = 0; i < count; i++) {
       heat[i] = Math.max(0, heat[i] - dt * 0.8);
       shown[i] = damp(shown[i], value[i], 12, dt);
-      matrix.makeScale(1, 0.06 + clamp(shown[i], 0, 1) * 0.8, 1);
-      matrix.setPosition(cellX(i), 0, cellZ(i));
+      matrix.makeTranslation(cellX(i), 0, cellZ(i));
       cells.setMatrixAt(i, matrix);
-      if (failing > 0) colour.copy(blink ? fault : cool);
-      else colour.copy(cool).lerp(hot, heat[i] * heat[i]);
+      // Each element shows its cell's value as brightness; a fresh overwrite shows hot.
+      if (failing > 0) colour.copy(blink ? fault : dim);
+      else colour.copy(dim).lerp(lit, clamp(shown[i], 0, 1)).lerp(hot, heat[i] * heat[i]);
       cells.setColorAt(i, colour);
     }
     cells.instanceMatrix.needsUpdate = true;
     cells.instanceColor!.needsUpdate = true;
   }
 
-  const station: Station = { group, planeY: 0.4, update };
+  const station: Station = { group, planeY: 0.1, update };
   return station;
 }

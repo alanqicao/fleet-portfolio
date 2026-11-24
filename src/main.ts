@@ -25,46 +25,46 @@ interface Asset {
 }
 
 /** The ship that stands for each project, where it flies in the formation, and how to play with it. */
-const models: Record<string, { build: () => Station; x: number; y: number; z: number; ship: ShipSpec; mouse: string; touch: string }> = {
+const models: Record<string, { build: () => Station; x: number; y: number; z: number; ship: ShipSpec; carries?: boolean; mouse: string; touch: string }> = {
   "pcsx2": {
     build: createFuzz, x: -30, y: 0, z: -12,
     ship: { file: "/models/harbinger.glb", length: 14, turn: [0, 0, 0], at: [0.8, 1.0, -5.0], drives: [0.18, 0.35, 0.5, 0.65, 0.82].map((z) => ({ z, y: 0.6, r: 0.05 })), driveColor: 0xff8a3c },
-    mouse: "The display under the cruiser is its memory. Probes overwrite the cells: move over them to aim, click for a salvo, and keep going until it faults and restarts.",
-    touch: "The display under the cruiser is its memory. Probes overwrite the cells: tap for a salvo, and keep going until it faults and restarts.",
+    mouse: "The panel beside the cruiser shows its memory. Probes strike the hull and overwrite cells: move over the panel to aim, click for a salvo, and keep going until the ship faults and restarts.",
+    touch: "The panel beside the cruiser shows its memory. Probes strike the hull and overwrite cells: tap the panel for a salvo, and keep going until the ship faults and restarts.",
   },
   "yolo-fishing-bot": {
     build: createScan, x: -4, y: 4, z: -18,
     ship: { file: "/models/colaid.glb", length: 5.5, turn: [0, Math.PI / 2, 0], at: [-4.4, 0.2, 0], drives: [{ z: 0.32, y: 0.44, r: 0.045 }, { z: 0.67, y: 0.44, r: 0.045 }, { z: 0.5, y: 0.5, r: 0.035 }], driveColor: 0x9fe2ff },
-    mouse: "The survey ship's detector boxes and names everything on its display. Move the lure onto a piece of ore for a bite, then click to reel it in.",
-    touch: "The survey ship's detector boxes and names everything on its display. Tap a piece of ore to cast the lure, and tap again to reel it in.",
+    mouse: "The survey ship's detector boxes and names everything drifting ahead of it. Move the lure onto a piece of ore for a bite, then click to reel it in.",
+    touch: "The survey ship's detector boxes and names everything drifting ahead of it. Tap a piece of ore to cast the lure, and tap again to reel it in.",
   },
   "robot-arm": {
-    build: createArm, x: 24, y: -2, z: -10,
+    build: createArm, carries: true, x: 24, y: -2, z: -10,
     ship: { file: "/models/transporter.glb", length: 8.5, turn: [0, Math.PI / 2, 0], at: [0, 0, 0], seatTop: true, drives: [{ z: 0.32, y: 0.57, r: 0.045 }, { z: 0.68, y: 0.57, r: 0.045 }], driveColor: 0x9fe2ff },
-    mouse: "The projected arm follows your pointer and the knobs on its console follow the joints. Click over a crate to pick it up, and again to let it go.",
-    touch: "Tap where the projected arm should reach. Tap a crate to pick it up, and again to let it go.",
+    mouse: "The tug's arm follows your pointer and the knobs beside it follow the joints. Click over a crate to pick it up, and again to let it go.",
+    touch: "Tap where the tug's arm should reach. Tap a crate to pick it up, and again to let it go.",
   },
   "sprite-editor": {
-    build: createSprite, x: 30, y: 2, z: 14,
+    build: createSprite, carries: true, x: 30, y: 2, z: 14,
     ship: { file: "/models/colony.glb", length: 13, turn: [0, -Math.PI / 2, 0], at: [-0.6, -0.35, 0], seatTop: true, drives: [{ z: 0.19, y: 0.54, r: 0.028 }, ...[0.34, 0.46, 0.58, 0.69].map((z) => ({ z, y: 0.54, r: 0.042 })), { z: 0.82, y: 0.54, r: 0.028 }], driveColor: 0x7fe8ff },
-    mouse: "Drag across the projected board to paint. Click a tank to change colour; the dark tank erases.",
-    touch: "Tap a tank to choose a colour, then tap the projected board to paint.",
+    mouse: "Drag across the display set into the carrier's deck to paint. Click a paint well to change colour; the dark one erases.",
+    touch: "Tap a paint well to choose a colour, then tap the deck display to paint.",
   },
   "multiplayer-snake": {
     build: createSnake, x: 4, y: -3, z: 16,
     ship: { file: "/models/corinth.glb", length: 9, turn: [0, -Math.PI / 2, 0], at: [0.5, 2.6, -8.5], drives: [{ z: 0.08, y: 0.29, r: 0.06, tall: 1.9 }, { z: 0.92, y: 0.29, r: 0.06, tall: 1.9 }], driveColor: 0x6aa8ff },
-    mouse: "Three convoys share one patch of space. The orange one is yours: it follows your pointer, or turn it with A and D. Each beacon adds a car.",
-    touch: "Three convoys share one patch of space. The orange one is yours: tap and it heads there. Each beacon adds a car.",
+    mouse: "Three container convoys share one patch of space. The orange one is yours: it follows your pointer, or turn it with A and D. Each beacon adds a container.",
+    touch: "Three container convoys share one patch of space. The orange one is yours: tap and it heads there. Each beacon adds a container.",
   },
   "viotti-amazon": {
-    build: createFlow, x: -24, y: 1, z: 12,
+    build: createFlow, carries: true, x: -24, y: 1, z: 12,
     ship: { file: "/models/cargo.glb", length: 12, turn: [0, -Math.PI / 2, 0], at: [2.2, -0.15, 0], seatTop: true, drives: [{ z: 0.08, y: 0.25, r: 0.06 }, { z: 0.9, y: 0.25, r: 0.06 }], driveInset: 0.04, driveColor: 0x9fe2ff },
-    mouse: "Three feeder craft send cargo to one hold. Stacks under the yellow rail are short on stock. Click to run a sync. All figures here are made up.",
-    touch: "Three feeder craft send cargo to one hold. Stacks under the yellow rail are short on stock. Tap to run a sync. All figures here are made up.",
+    mouse: "Three feeder craft send crates to the freighter. A bay with a red lamp is short on stock. Click to run a sync. All figures here are made up.",
+    touch: "Three feeder craft send crates to the freighter. A bay with a red lamp is short on stock. Tap to run a sync. All figures here are made up.",
   },
 };
 
-/** The ship models are other people's work, used under CC BY 4.0, which asks for this credit. */
+/** The ships and props are other people's work, used under CC BY 4.0, which asks for this credit. */
 const shipCredits = [
   { title: "D.S.S. Harbinger battle cruiser", author: "Comrade1280", href: "https://sketchfab.com/3d-models/dss-harbinger-battle-cruiser-474f62d00ed54212b37f93ce91569c53" },
   { title: "Spaceship COLAID1 50k", author: "Jungle Jim", href: "https://sketchfab.com/3d-models/spaceship-colaid1-50k-34acc30c89364a668ab1025686a686bc" },
@@ -72,6 +72,12 @@ const shipCredits = [
   { title: "Colony Tactical Ship", author: "Rakshaan", href: "https://sketchfab.com/3d-models/colony-tactical-ship-050dae751a404f3087aac9241958e2b1" },
   { title: "Corinth Cargo Transporter", author: "Yvo Pors", href: "https://sketchfab.com/3d-models/corinth-cargo-transporter-7614d85856f6477ba2a603970dcbb0dd" },
   { title: "Cargo Spaceship", author: "blaice", href: "https://sketchfab.com/3d-models/cargo-spaceship-a53147cc2da943e7ae07f1e0b0a31518" },
+  { title: "Industrial robot arm", author: "olofunot", href: "https://sketchfab.com/3d-models/industrial-robot-arm-b4b5931851754747a734f72234c87e38" },
+  { title: "Asteroids Pack (rocky version)", author: "SebastianSosnowski", href: "https://sketchfab.com/3d-models/asteroids-pack-rocky-version-adde1ecf129e4509be8af61b84bafa85" },
+  { title: "Ore and crystals", author: "leha_pu", href: "https://sketchfab.com/3d-models/ore-and-crystals-dea7557c1db14b5fad3dd3911063f146" },
+  { title: "Sci-fi cargo crate", author: "andreas9343", href: "https://sketchfab.com/3d-models/sci-fi-cargo-crate-ac36898521304e51a8e305aa602f1f5b" },
+  { title: "Futuristic cargo container Low-Poly", author: "Begle", href: "https://sketchfab.com/3d-models/futuristic-cargo-container-low-poly-015f32ec950744c4898e17af07d43f65" },
+  { title: "Sci-Fi Personal Space Pod Ship", author: "futaba@blender", href: "https://sketchfab.com/3d-models/sci-fi-personal-space-pod-shipweekly-challenge-b158f01dd4a9416fb689ca4401856e7a" },
 ];
 
 const projects = [...projectList].sort((a, b) => a.order - b.order).filter((project) => models[project.id]);
@@ -118,8 +124,8 @@ function aboutStop() {
         <p>${escape(contact.introduction)}</p>
         <ul class="links">${contact.destinations.map((place) => `<li><a href="${escape(place.href)}">${escape(place.label)}</a></li>`).join("")}
           <li><a href="${escape(site.resume.href)}">${escape(site.resume.label)}</a></li></ul>
-        <h3>Ship models</h3>
-        <p>The ships are 3D models by other artists, resized and compressed for this site, and used under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+        <h3>3D models</h3>
+        <p>The ships, the arm, and the rocks, crates and craft around them are 3D models by other artists, resized and compressed for this site, and used under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
         <ul class="credits">${shipCredits.map((ship) => `<li><a href="${ship.href}">${escape(ship.title)}</a> by ${escape(ship.author)}</li>`).join("")}</ul>
       </div>
     </section>`;
@@ -181,7 +187,7 @@ function caseStudy(project: Project) {
 await document.fonts.load('600 44px "Barlow Condensed"');
 const placements: Placement[] = projects.map((project) => {
   const model = models[project.id];
-  return { station: model.build(), x: model.x, y: model.y, z: model.z, ship: model.ship };
+  return { station: model.build(), x: model.x, y: model.y, z: model.z, ship: model.ship, carries: model.carries ?? false };
 });
 const stage = createStage(document.getElementById("scene") as HTMLCanvasElement, placements);
 

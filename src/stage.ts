@@ -5,7 +5,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { flicker, ink, seeded, type Station, type StationInput } from "./kit.js";
-import { loadShip, type ShipSpec } from "./ship.js";
+import { loadShip, type ShipLive, type ShipSpec } from "./ship.js";
 
 export interface Placement {
   station: Station;
@@ -13,6 +13,8 @@ export interface Placement {
   y: number;
   z: number;
   ship: ShipSpec;
+  /** True when the station's fittings are mounted on the ship, so the two must move as one. */
+  carries: boolean;
 }
 
 interface Pose {
@@ -327,6 +329,7 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
   const ndc = new THREE.Vector2();
   const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const hit = new THREE.Vector3();
+  const helms = placements.map(() => ({ burn: 0, near: false, throttle: 0.7, surge: 0, speed: 0, rolling: false, turning: false }));
   const idle: StationInput = { point: null, pressed: false, clicked: false, keys: new Set() };
 
   let last = 0;
@@ -383,12 +386,45 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
       drift(dt);
       flicker(time);
       const focus = progress - 1;
-      placements.forEach(({ station, x, y, z }, index) => {
-        // Each ship rides its own slow swell.
-        const swell = y + Math.sin(time * 0.5 + index * 1.9) * 0.22;
-        station.group.position.y = swell;
-        station.group.rotation.z = Math.sin(time * 0.37 + index) * 0.012;
+      placements.forEach(({ station, x, y, z, ship, carries }, index) => {
         const away = Math.abs(focus - index);
+        const helm = helms[index];
+        const live = station.ship?.userData.live as ShipLive | undefined;
+
+        // As the camera arrives, the ship makes a short burn: it throttles up, eases forward
+        // against a spring, banks a little, and settles back.
+        const near = away < 0.5;
+        if (near && !helm.near) { helm.burn = 2.4; live?.jet(index % 2 ? "yawLeft" : "yawRight"); }
+        helm.near = near;
+        const wasBurning = helm.burn > 0.9;
+        helm.burn = Math.max(0, helm.burn - dt);
+        const burning = helm.burn > 0.9;
+        if (wasBurning && !burning) { live?.jet("port"); live?.jet("starboard"); }
+        const cruise = 0.62 + Math.sin(time * 0.23 + index * 2.1) * 0.14 + Math.sin(time * 0.71 + index) * 0.06;
+        helm.throttle = THREE.MathUtils.damp(helm.throttle, burning ? 1.9 : cruise, burning ? 5 : 1.6, dt);
+        live?.thrust(helm.throttle);
+        helm.speed += (((burning ? 1.1 : 0) - helm.surge) * 6 - helm.speed * 3.2) * dt;
+        helm.surge += helm.speed * dt;
+
+        // Between burns the ship holds station with small corrections. Each time its roll or
+        // its heading reverses, the jets on that side fire.
+        const rolling = Math.cos(time * 0.37 + index) > 0, turning = Math.cos(time * 0.21 + index * 1.3) > 0;
+        if (rolling !== helm.rolling) live?.jet(rolling ? "port" : "starboard");
+        if (turning !== helm.turning) live?.jet(turning ? "yawLeft" : "yawRight");
+        helm.rolling = rolling;
+        helm.turning = turning;
+        live?.tick(time, dt);
+
+        const bank = helm.burn > 0 ? Math.sin((2.4 - helm.burn) * 2.2) * 0.07 * (helm.burn / 2.4) : 0;
+        const roll = Math.sin(time * 0.37 + index) * 0.022 + bank;
+        const heading = Math.sin(time * 0.21 + index * 1.3) * 0.018 + helm.speed * 0.03;
+        const swell = y + Math.sin(time * 0.5 + index * 1.9) * 0.22;
+        // A ship that carries its station's fittings takes the whole station with it.
+        const mover = carries ? station.group : station.ship!;
+        station.group.position.set(x + (carries ? helm.surge : 0), swell, z);
+        if (!carries) mover.position.set(ship.at[0] + helm.surge, ship.at[1], ship.at[2]);
+        mover.rotation.set(roll, heading, -helm.speed * 0.02);
+
         if (away > 1.3 && progress > 0.6 && progress < poses.length - 1.6) return;
         let input = idle;
         if (away < 0.42 && pointer.active) {
@@ -396,7 +432,9 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
           raycaster.setFromCamera(ndc, camera);
           plane.constant = -(swell + station.planeY);
           if (raycaster.ray.intersectPlane(plane, hit)) {
-            hit.x -= x; hit.y = station.planeY; hit.z -= z;
+            station.group.updateMatrixWorld();
+            station.group.worldToLocal(hit);
+            hit.y = station.planeY;
             if (Math.abs(hit.x) < 8 && Math.abs(hit.z) < 6) {
               input = { point: hit, pressed: pointer.pressed, clicked: pointer.clicked, keys };
             }
@@ -436,7 +474,8 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
     // Where a point in a ship's own coordinates lands on screen, in CSS pixels.
     (window as unknown as Record<string, unknown>).benchPoint = (stop: number, x: number, y: number, z: number) => {
       const place = placements[stop - 1];
-      const spot = new THREE.Vector3(place.x + x, place.station.group.position.y + y, place.z + z).project(camera);
+      place.station.group.updateMatrixWorld();
+      const spot = place.station.group.localToWorld(new THREE.Vector3(x, y, z)).project(camera);
       return { x: Math.round((spot.x + 1) / 2 * window.innerWidth), y: Math.round((1 - spot.y) / 2 * window.innerHeight) };
     };
   }

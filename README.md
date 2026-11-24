@@ -17,7 +17,7 @@ npm run build    # type-check, then build to dist/
 
 ## Ship models
 
-The six ships are CC BY 4.0 models from Sketchfab, credited on the site's About section. The originals stay
+The six ships, the robot arm, and the props (rocks, ore, crates, containers, pod craft) are CC BY 4.0 models from Sketchfab, credited on the site's About section. The originals stay
 out of the build in `models-src/` (ignored by git); the site loads compressed copies from `public/models/`.
 To rebuild one:
 
@@ -31,3 +31,7 @@ Add `?bench` to the address to get two helpers in the browser console. `benchFra
 camera to a stop (0 is the opening, 1 to 6 the ships) and times that many frames. `benchPoint(stop, x, y, z)`
 gives the screen position of a point in that ship's own coordinates, which is how the pointer interactions
 were tested.
+
+Props keep their parts separate, so add these flags when rebuilding one:
+`--flatten false --join false --simplify false --instance false --palette false --prune false`.
+The arm depends on it: `src/rig.ts` turns its joints by part name.

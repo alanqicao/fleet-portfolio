@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { block, clamp, damp, engine, glow, ink, loft, mast, matte, navLights, plate, windowRow, seeded, spar, tag, type Station } from "../kit.js";
+import { clamp, damp, glow, ink, seeded, tag, type Station } from "../kit.js";
+import { prop } from "../props.js";
 
 const HALF_X = 3.8;
 const HALF_Z = 3.2;
@@ -7,7 +8,7 @@ const FIELD_X = 2.8;
 const DISH = new THREE.Vector3(-2.0, 0.2, 0);
 
 interface Body {
-  mesh: THREE.Mesh;
+  mesh: THREE.Object3D;
   frame: THREE.LineSegments;
   seen: THREE.Sprite;
   bite: THREE.Sprite;
@@ -27,17 +28,13 @@ export function createScan(): Station {
   const frameShape = new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1));
   const frameSeen = new THREE.LineBasicMaterial({ color: new THREE.Color(ink.yellow).multiplyScalar(2) });
   const frameBite = new THREE.LineBasicMaterial({ color: new THREE.Color(ink.orange).multiplyScalar(3) });
-  const rockShape = new THREE.IcosahedronGeometry(0.5, 0);
-  const oreShape = new THREE.OctahedronGeometry(0.5, 0);
-  const oreLook = new THREE.MeshStandardMaterial({
-    color: ink.orange, emissive: ink.orange, emissiveIntensity: 1.6, roughness: 0.4, flatShading: true,
-  });
 
   const bodies: Body[] = [false, true, false, true, false, true, false].map((ore, index) => {
-    const mesh = new THREE.Mesh(ore ? oreShape : rockShape, ore ? oreLook : matte(index % 2 ? ink.steel : ink.slate));
-    const size = ore ? 0.55 + random() * 0.2 : 0.7 + random() * 0.7;
-    mesh.scale.set(size, size * (0.7 + random() * 0.4), size * (0.8 + random() * 0.3));
-    mesh.castShadow = true;
+    // Real rocks from an asteroid pack, and ore with crystals that catch the light.
+    const size = ore ? 0.7 + random() * 0.25 : 0.8 + random() * 0.8;
+    const mesh = ore
+      ? prop("/models/ore.glb", size, { pick: index, shine: /cr[iy]stal/i })
+      : prop("/models/rocks.glb", size, { pick: index });
     const frame = new THREE.LineSegments(frameShape, frameSeen);
     const seen = tag(ore ? "ore" : "rock", "#ffb23e", "#0d1428");
     const bite = tag("bite", "#ff7a2b", "#0d1428");
