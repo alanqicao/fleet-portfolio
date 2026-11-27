@@ -36,9 +36,19 @@ Props keep their parts separate, so add these flags when rebuilding one:
 `--flatten false --join false --simplify false --instance false --palette false --prune false`.
 The arm depends on it: `src/rig.ts` turns its joints by part name.
 
-## Phones
+## Quality tiers
 
-Model textures are what fill graphics memory, and a phone browser closes a tab that asks for too much.
-`public/models/` holds the full set (about 385 MB of textures once on the graphics card) and
-`public/models/lite/` a set with smaller textures (about 97 MB). `src/models.ts` picks the light set on
-touch devices and small screens. When adding a model, build both.
+`src/models.ts` sorts each device into one of three tiers when the page starts, from the name of its
+graphics chip:
+
+- full: a discrete card or an Apple chip. Full-size textures, up to twice the screen's pixels, multisampling.
+- modest: graphics built into the processor (Intel, AMD integrated). The lighter model set, at most 1.25
+  times the screen's pixels, no multisampling.
+- light: phones and tablets. The lighter model set, at most 1.5 times the screen's pixels.
+
+Add `?tier=modest` (or `full`, `light`) to the address to try a tier on any machine. Whatever the tier, the
+page lowers its render resolution if frames run slow and raises it again when they run fast.
+
+`public/models/` holds the full set (about 385 MB of textures once on the graphics card, 641k triangles) and
+`public/models/lite/` the lighter one (about 97 MB, 435k triangles). When adding a model, build both. Models
+load two at a time, ships first.

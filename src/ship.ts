@@ -1,8 +1,6 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { lamp, plume, puff } from "./kit.js";
-import { modelUrl } from "./models.js";
+import { loadModel } from "./models.js";
 
 export interface ShipSpec {
   /** Path of the compressed model under /models. */
@@ -38,8 +36,6 @@ export interface ShipLive {
   tick(time: number, dt: number): void;
 }
 
-const loader = new GLTFLoader();
-loader.setMeshoptDecoder(MeshoptDecoder);
 let fleetSize = 0;
 
 /** Load a ship model, centre it, scale it, and fit it with drives, attitude jets and running lights. */
@@ -91,7 +87,7 @@ export function loadShip(spec: ShipSpec) {
   };
   holder.userData.live = live;
 
-  loader.load(modelUrl(spec.file), (gltf) => {
+  loadModel(spec.file, 0).then((gltf) => {
     const model = gltf.scene;
     model.rotation.set(...spec.turn);
     model.updateMatrixWorld(true);
@@ -171,7 +167,7 @@ export function loadShip(spec: ShipSpec) {
     }
     live.thrust(level);
     if (!powered) { powered = true; live.power(false); }
-  }, undefined, (error) => {
+  }).catch((error) => {
     console.error(`Ship model ${spec.file} failed to load.`, error);
   });
   return holder;

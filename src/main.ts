@@ -215,6 +215,14 @@ window.addEventListener("resize", measure);
 new ResizeObserver(measure).observe(page);
 measure();
 
+// Say how the fleet is arriving, and stop saying it once everything is here.
+const loading = document.getElementById("loading")!;
+window.addEventListener("models-progress", (event) => {
+  const { done, total } = (event as CustomEvent<{ done: number; total: number }>).detail;
+  loading.hidden = done >= total;
+  loading.textContent = `Loading models ${done} of ${total}`;
+});
+
 const lessMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const toggle = document.getElementById("motion")!;
 let paused = lessMotion.matches;

@@ -5,7 +5,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { flicker, ink, seeded, type Station, type StationInput } from "./kit.js";
-import { light } from "./models.js";
+import { quality } from "./models.js";
 import { loadShip, type ShipLive, type ShipSpec } from "./ship.js";
 
 export interface Placement {
@@ -200,7 +200,7 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
   scene.add(new THREE.HemisphereLight(0x7f9ad6, 0x1a2036, 1.1));
   const sun = new THREE.DirectionalLight(0xffe9cf, 5.2);
   sun.castShadow = true;
-  sun.shadow.mapSize.setScalar(light ? 1024 : 2048);
+  sun.shadow.mapSize.setScalar(quality.shadowMap);
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.03;
   sun.shadow.radius = 4;
@@ -219,8 +219,8 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
     scene.add(station.group);
   }
 
-  // Phones skip multisampling: at their pixel density it costs more than it shows.
-  const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: window.matchMedia("(pointer: coarse)").matches ? 0 : 4 });
+  // Multisampling is the costliest smoothing; only the full tier pays for it.
+  const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: quality.smoothing });
   const composer = new EffectComposer(renderer, target);
   composer.addPass(new RenderPass(scene, camera));
   composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.5, 0.7, 1.0));
@@ -251,8 +251,8 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
     const aspect = width / height;
     const tall = aspect < 0.9;
     const far = tall ? 2.55 : Math.max(1, 1.45 / aspect);
-    // Phone screens are dense enough that drawing every pixel costs more than it shows.
-    const ratio = Math.min(window.devicePixelRatio, light ? 1.5 : 2) * detail;
+    // Each tier caps how many pixels it draws; `detail` then trims that further if frames run slow.
+    const ratio = Math.min(window.devicePixelRatio, quality.pixelRatio) * detail;
     renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
     composer.setPixelRatio(ratio);
@@ -279,7 +279,7 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
   }
 
   // Drawing detail, from 1 (full) down. It drops when frames run slow and recovers when they run fast.
-  let detail = 1;
+  let detail = quality.startDetail;
   const gaps: number[] = [];
   let progress = 0;
   let paused = false;
@@ -345,7 +345,7 @@ export function createStage(canvas: HTMLCanvasElement, placements: Placement[]) 
     if (document.hidden) return;
     // Long gaps are a background tab or a stall, not a slow frame, so they do not count.
     if (gap > 4 && gap < 100) gaps.push(gap);
-    if (gaps.length >= 45) {
+    if (gaps.length >= 30) {
       const typical = gaps.reduce((sum, value) => sum + value, 0) / gaps.length;
       gaps.length = 0;
       const before = detail;

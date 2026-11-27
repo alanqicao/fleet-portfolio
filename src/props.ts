@@ -1,11 +1,6 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 
-import { modelUrl } from "./models.js";
-
-const loader = new GLTFLoader();
-loader.setMeshoptDecoder(MeshoptDecoder);
+import { loadModel } from "./models.js";
 
 interface Part {
   mesh: THREE.Mesh;
@@ -19,7 +14,7 @@ const files = new Map<string, Promise<Part[]>>();
 function parts(file: string) {
   let pending = files.get(file);
   if (!pending) {
-    pending = loader.loadAsync(modelUrl(file)).then((gltf) => {
+    pending = loadModel(file, 2).then((gltf) => {
       gltf.scene.updateMatrixWorld(true);
       const found: Part[] = [];
       gltf.scene.traverse((node) => {

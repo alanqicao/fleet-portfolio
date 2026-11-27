@@ -1,11 +1,6 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 
-import { modelUrl } from "./models.js";
-
-const loader = new GLTFLoader();
-loader.setMeshoptDecoder(MeshoptDecoder);
+import { loadModel } from "./models.js";
 
 export interface ArmParts {
   file: string;
@@ -48,7 +43,7 @@ export function loadArm(spec: ArmParts) {
   const rest = { bearing: 0, upper: 0, fore: 0, hand: 0 };
   const turn = new THREE.Quaternion();
 
-  loader.load(modelUrl(spec.file), (gltf) => {
+  loadModel(spec.file, 1).then((gltf) => {
     const model = gltf.scene;
     const find = (name: string) => {
       const part = model.getObjectByName(name);
@@ -109,7 +104,7 @@ export function loadArm(spec: ArmParts) {
     dims.fore = span(e, w) * scale;
     dims.hand = span(w, t) * scale;
     dims.ready = true;
-  }, undefined, (error) => console.error(`Arm model ${spec.file} failed to load.`, error));
+  }).catch((error) => console.error(`Arm model ${spec.file} failed to load.`, error));
 
   const swing = (joint: Hinge, angle: number) => {
     joint.part.quaternion.copy(turn.setFromAxisAngle(joint.axis, angle)).multiply(joint.rest);
